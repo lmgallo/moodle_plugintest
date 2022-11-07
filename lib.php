@@ -15,21 +15,42 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin strings are defined here.
+ * Library of functions for local_greetings
  *
  * @package     local_greetings
- * @category    string
  * @copyright   2022 Lorrie G. <lorrie@nephilaweb.com.ph>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+/** defined('MOODLE_INTERNAL') || die(); this is no longer needed */
 
-$string['pluginname'] = 'Greetings';
-$string['greetinguser'] = 'Greetings, user.';
-$string['greetingloggedinuser'] = 'Greetings, {$a}.';
-$string['greetinguserau'] = 'Hello, {$a}.';
-$string['greetinguseres'] = 'Hola, {$a}.';
-$string['greetinguserfj'] = 'Bula, {$a}.';
-$string['greetingusernz'] = 'Kia Ora, {$a}.';
-$string['greetinguserph'] = 'Kumusta, {$a}.';
+function local_greetings_get_greeting($user) {
+    if ($user == null) {
+        return get_string('greetinguser', 'local_greetings');
+    }
+
+    $country = $user->country;
+
+    switch ($country) {
+        case 'ES':
+            $langstr = 'greetinguseres';
+            break;
+        case 'AU':
+            $langstr = 'greetinguserau';
+            break;
+        case 'FJ':
+            $langstr = 'greetinguserfj';
+            break;
+        case 'NZ':
+            $langstr = 'greetingusernz';
+            break;
+        case 'PH':
+            $langstr = 'greetinguserph';
+            break;
+        default:
+            $langstr = 'greetingloggedinuser';
+            break;
+    }
+
+    return get_string($langstr, 'local_greetings', fullname($user));
+}
