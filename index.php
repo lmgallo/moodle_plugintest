@@ -23,11 +23,10 @@
  */
 
 require_once('../../config.php');
-require_once($CFG->dirroot. '/local/greetings/lib.php');
-require_once($CFG->dirroot. '/local/greetings/message_form.php');
+require_once($CFG->dirroot . '/local/greetings/lib.php');
+require_once($CFG->dirroot . '/local/greetings/message_form.php');
 
 $context = context_system::instance();
-
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/greetings/index.php'));
 $PAGE->set_pagelayout('standard');
@@ -41,7 +40,30 @@ if (isguestuser()) {
 }
 
 $allowpost = has_capability('local/greetings:postmessages', $context);
+$deletepost = has_capability('local/greetings:deleteownmessage', $context);
 $deleteanypost = has_capability('local/greetings:deleteanymessage', $context);
+
+$action = optional_param('action', '', PARAM_TEXT);
+
+if ($action == 'del') {
+    require_sesskey();
+
+    $id = required_param('id', PARAM_TEXT);
+
+    if ($deleteanypost || $deletepost) {
+        $params = array('id' => $id);
+
+        // Users without permission should only delete their own post.
+        if (!$deleteanypost) {
+            $params += ['userid' => $USER->id];
+        }
+
+        // TODO: Confirm before deleting.
+        $DB->delete_records('local_greetings_messages', $params);
+
+        redirect($PAGE->url);
+    }
+}
 
 $messageform = new local_greetings_message_form();
 
@@ -63,7 +85,7 @@ if ($data = $messageform->get_data()) {
 echo $OUTPUT->header();
 
 if (isloggedin()) {
-    echo local_greetings_get_greeting($USER);
+    echo $OUTPUT->heading(local_greetings_get_greeting($USER));
 } else {
     echo get_string('greetinguser', 'local_greetings');
 }
@@ -94,12 +116,12 @@ if (has_capability('local/greetings:viewmessages', $context)) {
         echo html_writer::tag('small', userdate($m->timecreated), array('class' => 'text-muted'));
         echo html_writer::end_tag('p');
 
-        if ($deleteanypost) {
+        if ($deleteanypost || ($deletepost && $m->userid == $USER->id)) {
             echo html_writer::start_tag('p', array('class' => 'card-footer text-center'));
             echo html_writer::link(
                 new moodle_url(
                     '/local/greetings/index.php',
-                    array('action' => 'del', 'id' => $m->id)
+                    array('action' => 'del', 'id' => $m->id, 'sesskey' => sesskey())
                 ),
                 $OUTPUT->pix_icon('t/delete', '') . get_string('delete')
             );
