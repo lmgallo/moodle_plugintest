@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Main file to view greetings
+ * Main file to view greetings.
  *
  * @package     local_greetings
  * @copyright   2022 Lorrie G. <lorrie@nephilaweb.com.ph>
