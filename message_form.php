@@ -15,8 +15,8 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Library of functions for local_greetings.
- *
+ * Message form
+ * 
  * @package     local_greetings
  * @copyright   2022 Lorrie G. <lorrie@nephilaweb.com.ph>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
