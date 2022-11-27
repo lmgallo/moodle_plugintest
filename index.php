@@ -42,6 +42,8 @@ if (isguestuser()) {
 $allowpost = has_capability('local/greetings:postmessages', $context);
 $deletepost = has_capability('local/greetings:deleteownmessage', $context);
 $deleteanypost = has_capability('local/greetings:deleteanymessage', $context);
+$editpost = has_capability('local/greetings:editownmessage', $context);
+$editanypost = has_capability('local/greetings:editanymessage', $context);
 
 $action = optional_param('action', '', PARAM_TEXT);
 
@@ -60,6 +62,24 @@ if ($action == 'del') {
 
         // TODO: Confirm before deleting.
         $DB->delete_records('local_greetings_messages', $params);
+
+        redirect($PAGE->url);
+    }
+}
+
+if ($action == 'edit') {
+    require_sesskey();
+
+    $id = required_param('id', PARAM_TEXT);
+
+    if ($editanypost || $editpost) {
+        $params = array('id' => $id);
+
+        if (!$editanypost) {
+            $params += ['userid' => $USER->id];
+        }
+
+        $DB->edit_records('local_greetings_messages', $params);
 
         redirect($PAGE->url);
     }
@@ -123,7 +143,15 @@ if (has_capability('local/greetings:viewmessages', $context)) {
                     '/local/greetings/index.php',
                     array('action' => 'del', 'id' => $m->id, 'sesskey' => sesskey())
                 ),
-                $OUTPUT->pix_icon('t/delete', '') . get_string('delete')
+                $OUTPUT->pix_icon('t/delete', '') 
+            );
+            
+            echo html_writer::link(
+                new moodle_url(
+                    '/local/greetings/index.php',
+                    array('action' => 'edit', 'id' => $m->id, 'sesskey' => sesskey())
+                ),
+                $OUTPUT->pix_icon('t/edit', '')
             );
             echo html_writer::end_tag('p');
         }
